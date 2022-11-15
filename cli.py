@@ -2,10 +2,8 @@
 # the Tic-Tac-Toe game. This is where input and output happens.
 # For core game logic, see logic.py.
 
-from logic import make_empty_board
-from logic import other_player
-from logic import update_board
-from logic import get_winner
+import logic
+
 def show_board(board):
     for i in range(3):
         for j in range(3):
@@ -38,27 +36,39 @@ def load_input(player):
     return x, y
 
 if __name__ == '__main__':
-    board = make_empty_board()
+    game = logic.Game()
     winner = None
-    player = "X"
+    player = logic.Player("X")
+
+
+    isSinglePlayer = input("Single player please enter 1, Two players please enter 2:")
+    while isSinglePlayer != "1" and isSinglePlayer != "2":
+        isSinglePlayer = input("Single player please enter 1, Two players please enter 2:")
+
     while winner == None:
         # TODO: Show the board to the user.
-        show_board(board)
+        show_board(game.board)
         # TODO: Input a move from the player.
-        x, y = load_input(player)
-        while is_coordinate_valid(board, int(x), int(y)) != True:
-            print("Please input a coordinate that not been taken!")
-            x, y = load_input(player)
+        if isSinglePlayer == "2" or player.name == "X":
+            player.x_move, player.y_move = load_input(player.name)
+            while is_coordinate_valid(game.board, int(player.x_move), int(player.y_move)) != True:
+                print("Please input a coordinate that not been taken!")
+                player.x_move, player.y_move = load_input(player.name)
+        else:
+            player.x_move, player.y_move = game.get_bot_input()
+            print("Bot took a move on [" + str(player.x_move) + ", " + str(player.y_move) + "]")
         # TODO: Update the board.
-        update_board(board, int(x), int(y), player)
+        game.update_board(int(player.x_move), int(player.y_move), player.name)
         # TODO: Update who's turn it is.
-        winner = get_winner(board)
+        winner = game.get_winner()
         if winner == "X" or winner == "O":
-            print("Player "+player + " wins!!")
-            show_board(board)
+            if isSinglePlayer == "1" and winner == "O":
+                print("Bot wins!!")
+            else:
+                print("Player " + player.name + " wins!!")
+            show_board(game.board)
         elif winner == "Draw":
             print("Draw! Game ends!")
-            show_board(board)
+            show_board(game.board)
         else:
-            player = other_player(player)
-
+            player = logic.Player(game.other_player(player.name))
